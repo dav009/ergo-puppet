@@ -1,4 +1,4 @@
-package com.dav009.ergopilot
+package com.dav009.ergopilot.simulation
 
 import org.ergoplatform.ErgoLikeTransaction
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter

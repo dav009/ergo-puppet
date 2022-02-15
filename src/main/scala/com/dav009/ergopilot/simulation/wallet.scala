@@ -1,5 +1,5 @@
-package com.dav009.ergopilot
-
+package com.dav009.ergopilot.simulation
+import com.dav009.ergopilot.model.{Wallet, Party, TokenInfo, TokenAmount}
 import org.ergoplatform.{ErgoBox, ErgoAddressEncoder, P2PKAddress, ErgoLikeTransaction}
 import org.ergoplatform.appkit.{
   Address,
@@ -23,49 +23,6 @@ import org.ergoplatform.appkit.JavaHelpers
 import java.util
 import sigmastate.basics.{DLogProtocol}
 import sigmastate.basics.DiffieHellmanTupleProverInput
-
-trait BlockchainSimulation {
-
-  def newParty(name: String, ctx: BlockchainContext): Party
-
-  def newToken(name: String): TokenInfo
-
-  def send(tx: ErgoLikeTransaction): Unit
-
-  def setHeight(height: Int): Unit
-
-  def getHeight: Int
-
-  def selectUnspentBoxesFor(
-      address: Address
-  ): List[ErgoBox]
-}
-
-trait Party {
-  def name: String
-  def wallet: Wallet
-
-  def generateUnspentBoxes(
-      toSpend: Long,
-      tokensToSpend: List[TokenAmount] = List()
-  ): Unit
-
-  def selectUnspentBoxes(
-      toSpend: Long,
-      tokensToSpend: List[TokenAmount] = List()
-  ): List[ErgoBox]
-
-  def printUnspentAssets(): Unit
-}
-
-// check if we can replace this with ergowallet in appkit
-trait Wallet extends ErgoWallet {
-  def name: String
-
-  def getAddress: Address
-
-  def sign(tx: UnsignedTransaction): SignedTransaction
-}
 
 class DummyWalletImpl(
     blockchain: DummyBlockchainSimulationImpl,

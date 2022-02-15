@@ -1,4 +1,5 @@
-package com.dav009.ergopilot
+package com.dav009.ergopilot.simulation
+import com.dav009.ergopilot.model.{BlockchainSimulation, Party, TokenAmount, TokenInfo}
 import org.ergoplatform.appkit.{Address, BlockchainContext}
 import org.ergoplatform.{ErgoBox, ErgoLikeTransaction}
 import scala.collection.mutable
@@ -16,30 +17,6 @@ import org.ergoplatform.ErgoBox.TokenId
 import sigmastate.eval.Extensions.ArrayOps
 import special.collection.Coll
 import scorex.util._
-
-//import com.dav009.ergopilot.Party
-// ToDo replace this for  org.ergoplatform.explorer.client.model.{TokenInfo, TokenAmount}
-case class TokenInfo(tokenId: Coll[Byte], tokenName: String)
-
-case class TokenAmount(token: TokenInfo, tokenAmount: Long) {
-  override def toString: String =
-    s"(${Base16.encode(token.tokenId.toArray)}, $tokenAmount)"
-}
-
-object TokenAmount {
-  implicit def apply(t: (TokenInfo, Long)): TokenAmount = new TokenAmount(t._1, t._2)
-
-  def prettyprintTokens(tokens: List[TokenAmount]): String = {
-    if (tokens.isEmpty) {
-      "none"
-    } else {
-      tokens
-        .map(t => s"${t.token.tokenName} -> ${t.tokenAmount}")
-        .mkString(", ")
-    }
-  }
-
-}
 
 case class DummyBlockchainSimulationImpl(scenarioName: String) extends BlockchainSimulation {
 
