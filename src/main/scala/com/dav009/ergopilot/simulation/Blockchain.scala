@@ -1,6 +1,6 @@
 package com.dav009.ergopilot.simulation
 import com.dav009.ergopilot.model.{BlockchainSimulation, Party, TokenAmount, TokenInfo}
-import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoType}
+import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoType, ErgoValue}
 import org.ergoplatform.{ErgoBox, ErgoLikeTransaction}
 import scala.collection.mutable
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeStateContext}
@@ -195,6 +195,7 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
     val dataInputBoxes = tx.dataInputs.map(i => getBox(i.boxId)).toIndexedSeq
     TransactionVerifier.verify(tx, boxesToSpend, dataInputBoxes, parameters, stateContext)
 
+    
     val newBoxes: mutable.ArrayBuffer[ErgoBox] = new mutable.ArrayBuffer[ErgoBox]()
     newBoxes.appendAll(tx.outputs)
     newBoxes.appendAll(
@@ -202,12 +203,43 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
     )
     unspentBoxes = newBoxes
     boxes.appendAll(tx.outputs)
+    // convert from colln to List
+    // add mapping from ergoId to name
+    import org.ergoplatform.appkit.Iso
+    val tokenBoxPairs = tx.outputs.flatMap{
+      b =>
+      // fix mintint tokens should be added to internal database of tokens
+      Iso.isoTokensListToPairsColl.from(b.additionalTokens).asScala.map{
+        t => (t, b)
+      }
+    }
+
+    val newTokens = tokenBoxPairs.filter{
+     case (t: ErgoToken, b:ErgoBox) =>
+         ! tokenNames.contains(t.getId())
+    }
+
+    import org.ergoplatform.appkit.JavaHelpers._
+    val newTokensWithNames = newTokens.map{
+      case (t: ErgoToken, b:ErgoBox) =>
+       
+        val s:Array[Byte] = b.getReg[Coll[Byte]](4).get.toArray
+        
+        val name = new String(s)//"DummyNameee"//b.registers(0).asInstanceOf[Coll[Byte]].toArray
+          t.getId() -> name
+    }
+
+    
+
+     val updatedTokens = newTokensWithNames
+     tokenNames ++= updatedTokens
+//    tokenNames += (new ErgoId(tokenId) -> name)
     println(s"..$scenarioName: Accepting transaction ${tx.id} to the blockchain")
   }
 
   override def newToken(name: String): TokenInfo = {
     print("new ID:::")
-    val tokenId =   Digest32 @@ boxIdGen.sample.get
+    val tokenId =    boxIdGen.sample.get
     print("new ID: "+ tokenId)
    
       tokenNames += (new ErgoId(tokenId) -> name)

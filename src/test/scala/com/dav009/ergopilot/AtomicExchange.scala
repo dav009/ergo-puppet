@@ -272,8 +272,34 @@ object AssetsAtomicExchangePlayground  {
     sellerParty.printUnspentAssets()
     buyerParty.printUnspentAssets()
       dexParty.printUnspentAssets()
+
+      // mint new token
+
+      val spendingBoxes = ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress,0, 0)
+      val proposedToken: ErgoToken = new ErgoToken(spendingBoxes.get(0).getId, 1)
+      val tokenName="somename"
+      val tokenDescription = "tokenDescription"
+      val newBox = txBuilder.outBoxBuilder().mintToken(proposedToken, tokenName, tokenDescription, 10.toInt).value(swapTxFee)
+        .contract(c3).build()
+
+      val mintTx = ctx.newTxBuilder()
+        .boxesToSpend(spendingBoxes)
+        .outputs(newBox)
+        .fee(Parameters.MinFee)
+        .sendChangeTo(dexParty.wallet.getAddress.getErgoAddress())
+        // it should look like .sendChangeTo(prover.getP2PKAddress())
+        .build()
+
+      ctx.sendTransaction(sellerParty.wallet.sign(mintTx))
+
+        sellerParty.printUnspentAssets()
+    buyerParty.printUnspentAssets()
+      dexParty.printUnspentAssets()
+
       // assert assets based on original implementation
     })
+
+    
 
     //assert(1==1)
   }
