@@ -30,7 +30,10 @@ import org.ergoplatform.appkit.{Iso, _}
 import sigmastate.utils.Helpers._
 import collection.JavaConverters._
 import sigmastate.eval.CostingDataContext
-
+import org.ergoplatform.appkit.Iso
+    import special.collection.Coll
+import special.sigma.{SigmaProp, SigmaContract, Context, DslSyntaxExtensions, SigmaDslBuilder}
+import sigmastate.eval.CostingSigmaDslBuilder
 import scalan.RType
 
 import org.ergoplatform.ErgoBox.{AdditionalRegisters, R4, TokenId}
@@ -102,63 +105,23 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
       toSpend: Long,
       tokensToSpend: List[TokenAmount]
   ): Unit = {
-
-    println("tospend")
-    println(tokensToSpend)
     tokensToSpend.foreach{println}
     tokensToSpend.foreach { t =>
       tokenNames += (t.token.tokenId -> t.token.tokenName)
     }
 
-    import sigmastate.eval.CostingSigmaDslBuilder
+ 
     import RType._
-    import special.collection.Coll
-    import special.sigma.{SigmaProp, SigmaContract, Context, DslSyntaxExtensions, SigmaDslBuilder}
-
     val addTokens = tokensToSpend.map(ta => (ta.token.tokenId.getBytes().asInstanceOf[TokenId], ta.tokenAmount)).toList
-    //val newToknes =  tokensToSpend.map(ta => new ErgoToken(ta.token.tokenId, ta.tokenAmount))
-    //isoTokensListToPairsColl
-    //implicit val TokenIdRType2: RType[TokenId] = RType.arrayRType[Byte].asInstanceOf[RType[TokenId]]
-    //implicit val pairType: RType[(TokenId, Long)] = RType.pairRType[ RType[TokenId], RType[Long]].asInstanceOf[RType[(TokenId, Long)]]
-
-    //implicit val pair: RType[TokenId] = RType.pairRType(TokenIdRType, RType.LongType)
-    println("before z")
-    val z= addTokens.toArray[(TokenId, Long)]
-    println("after z")
-    //val ergoType = 
-    //  ErgoType.pairType(
-     //   new ErgoType(TokenIdRType),
-      //  ErgoType.longType())
-    //val innerErgoType = ErgoType.byteType()
-    //val t =  ergoTyepe.getRType()
-    println("Z::")
-    println(z)
-    z.foreach(println)
-    println(z.size)
-    println("converting to coll")
-    
-    if (z.size > 0){
-      val ccc = List((z(0)._1, z(0)._2)).toArray
-      println("AAAAA")
-      val aaa =  CostingSigmaDslBuilder.Colls.fromArray(ccc)
-      println("after aa")
-    }
-    
-    val ddd = CostingSigmaDslBuilder.Colls.fromArray(z)// CostingSigmaDslBuilder.Colls.fromArray(z, innerErgoType.getRType())
-    println("after ddd")  
-    import special.sigma._;
-    //import JavaHelpers._
-    //JavaHelpers.SigmaDsl().Colls().fromArray(z, t)
-
-    //Iso.isoTokensListToPairsColl().from()
-
+    val z = addTokens.toArray[(TokenId, Long)]
+    val additionalTokens = CostingSigmaDslBuilder.Colls.fromArray(z)
     val b = new ErgoBox(
       index = nextBoxId,
       value = toSpend,
       ergoTree = address.getErgoAddress.script,
       creationHeight = chainHeight,
       transactionId = ErgoBox.allZerosModifierId,
-      additionalTokens =ddd
+      additionalTokens = additionalTokens
          
     )
     nextBoxId = (nextBoxId + 1).toShort
@@ -189,6 +152,26 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
     party
   }
 
+  def tokensToMint(tx: ErgoLikeTransaction) = {
+      val tokenBoxPairs = tx.outputs.flatMap{
+      b =>
+      Iso.isoTokensListToPairsColl.from(b.additionalTokens).asScala.map{
+        t => (t, b)
+      }
+    }
+    val newTokens = tokenBoxPairs.filter{
+     case (t: ErgoToken, b:ErgoBox) =>
+         ! tokenNames.contains(t.getId())
+    }
+    val newTokensWithNames = newTokens.map{
+      case (t: ErgoToken, b:ErgoBox) =>
+        val s:Array[Byte] = b.getReg[Coll[Byte]](4).get.toArray
+        val name = new String(s)
+          t.getId() -> name
+    }
+    newTokensWithNames
+  }
+
   override def send(tx: ErgoLikeTransaction): Unit = {
 
     val boxesToSpend   = tx.inputs.map(i => getUnspentBox(i.boxId)).toIndexedSeq
@@ -205,35 +188,9 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
     boxes.appendAll(tx.outputs)
     // convert from colln to List
     // add mapping from ergoId to name
-    import org.ergoplatform.appkit.Iso
-    val tokenBoxPairs = tx.outputs.flatMap{
-      b =>
-      // fix mintint tokens should be added to internal database of tokens
-      Iso.isoTokensListToPairsColl.from(b.additionalTokens).asScala.map{
-        t => (t, b)
-      }
-    }
-
-    val newTokens = tokenBoxPairs.filter{
-     case (t: ErgoToken, b:ErgoBox) =>
-         ! tokenNames.contains(t.getId())
-    }
-
-    import org.ergoplatform.appkit.JavaHelpers._
-    val newTokensWithNames = newTokens.map{
-      case (t: ErgoToken, b:ErgoBox) =>
-       
-        val s:Array[Byte] = b.getReg[Coll[Byte]](4).get.toArray
-        
-        val name = new String(s)//"DummyNameee"//b.registers(0).asInstanceOf[Coll[Byte]].toArray
-          t.getId() -> name
-    }
-
-    
-
-     val updatedTokens = newTokensWithNames
-     tokenNames ++= updatedTokens
-//    tokenNames += (new ErgoId(tokenId) -> name)
+    val newTokens = tokensToMint(tx)
+    tokenNames ++= newTokens
+  
     println(s"..$scenarioName: Accepting transaction ${tx.id} to the blockchain")
   }
 
@@ -244,11 +201,6 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
    
       tokenNames += (new ErgoId(tokenId) -> name)
       return TokenInfo(new ErgoId(tokenId), name)
-  
-    
-   // val tokenId = boxIdGen //ObjectGenerators.newErgoId
-    
- //   TokenInfo(tokenId, name)
   }
 
   def getUnspentCoinsFor(address: Address): Long =
@@ -265,10 +217,3 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
 
   def setHeight(height: Int): Unit = { chainHeight = height }
 }
-
-//object ObjectGenerators {
-
-//  def newErgoId: Coll[Byte] =
-  //  Array.fill(TokenId.size)((scala.util.Random.nextInt(256) - 128).toByte).toColl
-
-//}

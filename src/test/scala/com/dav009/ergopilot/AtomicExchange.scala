@@ -269,11 +269,23 @@ object AssetsAtomicExchangePlayground  {
     ctx.sendTransaction(swapTransactionSigned)
 
 
-    sellerParty.printUnspentAssets()
+    //sellerParty.printUnspentAssets()
+   // buyerParty.printUnspentAssets()
+    //  dexParty.printUnspentAssets()
+
+
+      
+
+        sellerParty.printUnspentAssets()
     buyerParty.printUnspentAssets()
       dexParty.printUnspentAssets()
 
-      // mint new token
+      // assert assets based on original implementation
+      assert(blockchainSim.getUnspentCoinsFor(sellerParty.wallet.getAddress) == 50000000)
+      assert(blockchainSim.getUnspentCoinsFor(buyerParty.wallet.getAddress) == 1000000)
+      assert(blockchainSim.getUnspentCoinsFor(dexParty.wallet.getAddress) == 1000000)
+
+            // mint new token
 
       val spendingBoxes = ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress,0, 0)
       val proposedToken: ErgoToken = new ErgoToken(spendingBoxes.get(0).getId, 1)
@@ -291,25 +303,11 @@ object AssetsAtomicExchangePlayground  {
         .build()
 
       ctx.sendTransaction(sellerParty.wallet.sign(mintTx))
-
-        sellerParty.printUnspentAssets()
-    buyerParty.printUnspentAssets()
-      dexParty.printUnspentAssets()
-
-      // assert assets based on original implementation
     })
 
-    
-
-    //assert(1==1)
   }
 
-  //def some() {
-    //assert(1==2)
 
-  //}
-
- // some()
  // swapScenario
   //refundSellOrderScenario
   //refundBuyOrderScenario
