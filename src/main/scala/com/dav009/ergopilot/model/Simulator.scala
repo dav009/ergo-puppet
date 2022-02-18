@@ -16,7 +16,6 @@ import special.collection.Coll
 import scorex.util.encode.Base16
 import org.ergoplatform.appkit.ErgoId
 
-// ToDo replace this for  org.ergoplatform.explorer.client.model.{TokenInfo, TokenAmount}
 case class TokenInfo(tokenId: ErgoId, tokenName: String)
 
 case class TokenAmount(token: TokenInfo, tokenAmount: Long) {
@@ -73,7 +72,6 @@ trait Party {
   def printUnspentAssets(): Unit
 }
 
-// check if we can replace this with ergowallet in appkit
 trait Wallet extends ErgoWallet {
   def name: String
 
