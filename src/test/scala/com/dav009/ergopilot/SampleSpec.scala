@@ -3,12 +3,15 @@ package com.dav009.ergopilot.test
 import com.dav009.ergopilot.Simulator._
 import org.ergoplatform.appkit._
 import org.ergoplatform.P2PKAddress
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.{PropSpec, Matchers}
+///import org.scalatest.matchers.should.Matchers
 import org.ergoplatform.ErgoAddressEncoder
+import org.scalatest._
+import org.scalatest.{Matchers, WordSpecLike}
 
-class SimpleTransactionSpec extends AnyFlatSpec {
+class SimpleTransactionSpec extends WordSpecLike with Matchers {
 
-  it should "emulate a simple transaction" in {
+   "emulate a simple transaction" in {
 
     val (blockchainSim, ergoClient) = newBlockChainSimulationScenario(
       "SwapWithPartialAndThenTotalMatching"

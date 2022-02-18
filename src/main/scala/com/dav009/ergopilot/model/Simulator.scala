@@ -14,13 +14,14 @@ import org.ergoplatform.{ErgoBox, ErgoLikeTransaction}
 import scorex.util._
 import special.collection.Coll
 import scorex.util.encode.Base16
+import org.ergoplatform.appkit.ErgoId
 
 // ToDo replace this for  org.ergoplatform.explorer.client.model.{TokenInfo, TokenAmount}
-case class TokenInfo(tokenId: Coll[Byte], tokenName: String)
+case class TokenInfo(tokenId: ErgoId, tokenName: String)
 
 case class TokenAmount(token: TokenInfo, tokenAmount: Long) {
   override def toString: String =
-    s"(${Base16.encode(token.tokenId.toArray)}, $tokenAmount)"
+    s"(${Base16.encode(token.tokenId.getBytes())}, $tokenAmount)"
 }
 
 object TokenAmount {
