@@ -31,22 +31,24 @@ import sigmastate.utils.Helpers._
 import collection.JavaConverters._
 import sigmastate.eval.CostingDataContext
 import org.ergoplatform.appkit.Iso
-    import special.collection.Coll
+import special.collection.Coll
 import special.sigma.{SigmaProp, SigmaContract, Context, DslSyntaxExtensions, SigmaDslBuilder}
 import sigmastate.eval.CostingSigmaDslBuilder
 import scalan.RType
 
 import org.ergoplatform.ErgoBox.{AdditionalRegisters, R4, TokenId}
 
-case class DummyBlockchainSimulationImpl(scenarioName: String) extends BlockchainSimulation with ObjectGenerators{
+case class DummyBlockchainSimulationImpl(scenarioName: String)
+    extends BlockchainSimulation
+    with ObjectGenerators {
 
   private var boxes: mutable.ArrayBuffer[ErgoBox] = new mutable.ArrayBuffer[ErgoBox]()
 
   private var unspentBoxes: mutable.ArrayBuffer[ErgoBox] =
     new mutable.ArrayBuffer[ErgoBox]()
   private val tokenNames: mutable.Map[ErgoId, String] = mutable.Map()
-  private var chainHeight: Int                            = 0
-  private var nextBoxId: Short                            = 0
+  private var chainHeight: Int                        = 0
+  private var nextBoxId: Short                        = 0
   private def getUnspentBoxesFor(address: Address): List[ErgoBox] =
     unspentBoxes.filter { b =>
       address.getErgoAddress.script == b.ergoTree
@@ -105,15 +107,15 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
       toSpend: Long,
       tokensToSpend: List[TokenAmount]
   ): Unit = {
-    tokensToSpend.foreach{println}
+    tokensToSpend.foreach { println }
     tokensToSpend.foreach { t =>
       tokenNames += (t.token.tokenId -> t.token.tokenName)
     }
 
- 
-    import RType._
-    val addTokens = tokensToSpend.map(ta => (ta.token.tokenId.getBytes().asInstanceOf[TokenId], ta.tokenAmount)).toList
-    val z = addTokens.toArray[(TokenId, Long)]
+    val addTokens = tokensToSpend
+      .map(ta => (ta.token.tokenId.getBytes().asInstanceOf[TokenId], ta.tokenAmount))
+      .toList
+    val z                = addTokens.toArray[(TokenId, Long)]
     val additionalTokens = CostingSigmaDslBuilder.Colls.fromArray(z)
     val b = new ErgoBox(
       index = nextBoxId,
@@ -122,7 +124,6 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
       creationHeight = chainHeight,
       transactionId = ErgoBox.allZerosModifierId,
       additionalTokens = additionalTokens
-         
     )
     nextBoxId = (nextBoxId + 1).toShort
     unspentBoxes.append(b)
@@ -153,21 +154,20 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
   }
 
   def tokensToMint(tx: ErgoLikeTransaction) = {
-      val tokenBoxPairs = tx.outputs.flatMap{
-      b =>
-      Iso.isoTokensListToPairsColl.from(b.additionalTokens).asScala.map{
-        t => (t, b)
+    val tokenBoxPairs = tx.outputs.flatMap { b =>
+      Iso.isoTokensListToPairsColl.from(b.additionalTokens).asScala.map { t =>
+        (t, b)
       }
     }
-    val newTokens = tokenBoxPairs.filter{
-     case (t: ErgoToken, b:ErgoBox) =>
-         ! tokenNames.contains(t.getId())
+    val newTokens = tokenBoxPairs.filter {
+      case (t: ErgoToken, b: ErgoBox) =>
+        !tokenNames.contains(t.getId())
     }
-    val newTokensWithNames = newTokens.map{
-      case (t: ErgoToken, b:ErgoBox) =>
-        val s:Array[Byte] = b.getReg[Coll[Byte]](4).get.toArray
-        val name = new String(s)
-          t.getId() -> name
+    val newTokensWithNames = newTokens.map {
+      case (t: ErgoToken, b: ErgoBox) =>
+        val s: Array[Byte] = b.getReg[Coll[Byte]](4).get.toArray
+        val name           = new String(s)
+        t.getId() -> name
     }
     newTokensWithNames
   }
@@ -178,7 +178,6 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
     val dataInputBoxes = tx.dataInputs.map(i => getBox(i.boxId)).toIndexedSeq
     TransactionVerifier.verify(tx, boxesToSpend, dataInputBoxes, parameters, stateContext)
 
-    
     val newBoxes: mutable.ArrayBuffer[ErgoBox] = new mutable.ArrayBuffer[ErgoBox]()
     newBoxes.appendAll(tx.outputs)
     newBoxes.appendAll(
@@ -190,17 +189,17 @@ case class DummyBlockchainSimulationImpl(scenarioName: String) extends Blockchai
     // add mapping from ergoId to name
     val newTokens = tokensToMint(tx)
     tokenNames ++= newTokens
-  
+
     println(s"..$scenarioName: Accepting transaction ${tx.id} to the blockchain")
   }
 
   override def newToken(name: String): TokenInfo = {
     print("new ID:::")
-    val tokenId =    boxIdGen.sample.get
-    print("new ID: "+ tokenId)
-   
-      tokenNames += (new ErgoId(tokenId) -> name)
-      return TokenInfo(new ErgoId(tokenId), name)
+    val tokenId = boxIdGen.sample.get
+    print("new ID: " + tokenId)
+
+    tokenNames += (new ErgoId(tokenId) -> name)
+    return TokenInfo(new ErgoId(tokenId), name)
   }
 
   def getUnspentCoinsFor(address: Address): Long =

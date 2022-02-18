@@ -19,8 +19,7 @@ import org.ergoplatform.appkit.impl.{SignedTransactionImpl, InputBoxImpl}
 import java.util;
 import scala.collection.JavaConverters._
 
-
-  //.serialization.generators.ObjectGenerators
+//.serialization.generators.ObjectGenerators
 
 class SimulatedBlockchainContext(
     client: ApiClient,
@@ -30,7 +29,7 @@ class SimulatedBlockchainContext(
     nodeInfo: NodeInfo,
     headers: JavaList[BlockHeader],
     blockchain: BlockchainSimulation
-) extends BlockchainContextImpl (
+) extends BlockchainContextImpl(
       client,
       retrofit,
       explorer,
@@ -38,7 +37,7 @@ class SimulatedBlockchainContext(
       NetworkType.MAINNET,
       nodeInfo,
       headers
-    )  {
+    ) {
 
   // ok
   // override def getNodeInfo: NodeInfo = {
