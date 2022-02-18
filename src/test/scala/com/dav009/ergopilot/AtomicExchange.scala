@@ -4,15 +4,12 @@ import com.dav009.ergopilot.Simulator._
 import com.dav009.ergopilot.model._
 import org.ergoplatform.appkit._
 import org.ergoplatform.P2PKAddress
-//import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.{PropSpec, Matchers, WordSpecLike}
+import org.scalatest.{ PropSpec, Matchers, WordSpecLike }
 import org.ergoplatform.ErgoAddressEncoder
 import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
-//import org.ergoplatform.explorer.client.model.{TokenInfo => ErgoTokenI}
 
-object AssetsAtomicExchangePlayground  {
-  //import org.ergoplatform.compiler.ErgoScalaCompiler._
+object AssetsAtomicExchangePlayground {
 
   def buyerOrder(
     ctx: BlockchainContext,
@@ -20,8 +17,7 @@ object AssetsAtomicExchangePlayground  {
     token: TokenInfo,
     tokenAmount: Long,
     ergAmount: Long,
-    txFee: Long
-  ) = {
+    txFee: Long) = {
 
     val buyerPk = buyerParty.wallet.getAddress.getPublicKey
 
@@ -40,14 +36,12 @@ object AssetsAtomicExchangePlayground  {
    } 
     """
 
-    //val buyerContractEnv: ScriptEnv = Map("buyerPk" -> buyerPk, "token" -> token)
-    //val buyerContractCompiled = ErgoScriptCompiler.compile(buyerContractEnv, BuyerContract)
     val env = ConstantsBuilder.create()
       .item("buyerPk", buyerPk)
       .item("tokenId", token.tokenId.getBytes())
       .item("tokenAmount", tokenAmount).build()
 
-    val buyerContractCompiled = ctx.compileContract(env,BuyerContract)
+    val buyerContractCompiled = ctx.compileContract(env, BuyerContract)
     buyerContractCompiled.getErgoTree()
 
     val txBuilder = ctx.newTxBuilder()
@@ -57,15 +51,13 @@ object AssetsAtomicExchangePlayground  {
       .contract(buyerContractCompiled).
       build()
 
-    //val buyerBidBox = Box(value = ergAmount, script = buyerContractCompiled)
-
-    val boxes = ctx.getUnspentBoxesFor(buyerParty.wallet.getAddress,0, 0)//, selectUnspentBoxes(toSpend=ergAmount + txFee).asJava
+    val boxes = ctx.getUnspentBoxesFor(buyerParty.wallet.getAddress, 0, 0)
     txBuilder
       .boxesToSpend(boxes)
       .outputs(buyerBidBox)
       .fee(txFee)
       .sendChangeTo(buyerParty.wallet.getAddress.getErgoAddress()).build()
-    
+
   }
 
   def sellerOrder(
@@ -75,12 +67,11 @@ object AssetsAtomicExchangePlayground  {
     tokenAmount: Long,
     ergAmount: Long,
     dexFee: Long,
-    txFee: Long
-  ) = {
+    txFee: Long) = {
 
     val sellerPk = sellerParty.wallet.getAddress.getPublicKey
 
-    val SellerContract =  """{
+    val SellerContract = """{
       sigmaProp(sellerPk || (
         OUTPUTS.size > 1 &&
         OUTPUTS(1).R4[Coll[Byte]].isDefined
@@ -96,15 +87,9 @@ object AssetsAtomicExchangePlayground  {
       .item("sellerPk", sellerPk)
       .item("ergAmount", ergAmount).build()
 
-   
-    val sellerContractCompiled = ctx.compileContract(env,SellerContract)
+    val sellerContractCompiled = ctx.compileContract(env, SellerContract)
 
-    //val sellerBalanceBoxes = sellerParty.selectUnspentBoxes(
-    //  toSpend       = dexFee + txFee,
-    //  tokensToSpend = List(token -> tokenAmount)
-    //)
-
-     val sellerBalanceBoxes = ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress,0, 0)
+    val sellerBalanceBoxes = ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress, 0, 0)
 
     val txBuilder = ctx.newTxBuilder()
     val tokens = new ErgoToken(token.tokenId, tokenAmount)
@@ -116,137 +101,109 @@ object AssetsAtomicExchangePlayground  {
       .tokens(tokens)
       .build()
 
-     txBuilder
+    txBuilder
       .boxesToSpend(sellerBalanceBoxes)
       .outputs(sellerAskBox)
       .fee(txFee)
       .sendChangeTo(sellerParty.wallet.getAddress.getErgoAddress()).build()
 
-
   }
 
   def swapScenario = {
-    
+
     val (blockchainSim, ergoClient) = newBlockChainSimulationScenario("Swap")
 
     println("creating token")
     val token = blockchainSim.newToken("TKN")
     println("created token")
-    ergoClient.execute( (ctx:BlockchainContext) => {
+    ergoClient.execute((ctx: BlockchainContext) => {
 
-    val buyerParty          = blockchainSim.newParty("buyer", ctx)
-    val buyerBidTokenAmount = 100L
-    val buyersBidNanoErgs   = 50000000L
-    val buyerDexFee         = 1000000L
-    val buyOrderTxFee       = MinTxFee
-    val buyerSwapBoxValue   = MinErg
+      val buyerParty = blockchainSim.newParty("buyer", ctx)
+      val buyerBidTokenAmount = 100L
+      val buyersBidNanoErgs = 50000000L
+      val buyerDexFee = 1000000L
+      val buyOrderTxFee = MinTxFee
+      val buyerSwapBoxValue = MinErg
 
-    buyerParty
-      .generateUnspentBoxes(
-        toSpend = buyersBidNanoErgs + buyOrderTxFee + buyerDexFee + buyerSwapBoxValue
-      )
+      buyerParty
+        .generateUnspentBoxes(
+          toSpend = buyersBidNanoErgs + buyOrderTxFee + buyerDexFee + buyerSwapBoxValue)
 
-    val buyOrderTransaction =
-      buyerOrder(
-        ctx,
-        buyerParty,
-        token,
-        buyerBidTokenAmount,
-        buyersBidNanoErgs + buyerDexFee + buyerSwapBoxValue,
-        buyOrderTxFee
-      )
+      val buyOrderTransaction =
+        buyerOrder(
+          ctx,
+          buyerParty,
+          token,
+          buyerBidTokenAmount,
+          buyersBidNanoErgs + buyerDexFee + buyerSwapBoxValue,
+          buyOrderTxFee)
 
-    val buyOrderTransactionSigned = buyerParty.wallet.sign(buyOrderTransaction)
+      val buyOrderTransactionSigned = buyerParty.wallet.sign(buyOrderTransaction)
 
-    ctx.sendTransaction(buyOrderTransactionSigned)
+      ctx.sendTransaction(buyOrderTransactionSigned)
 
-    val sellerParty          = blockchainSim.newParty("seller", ctx)
-    val sellerAskNanoErgs    = 50000000L
-    val sellerAskTokenAmount = 100L
-    val sellerDexFee         = 1000000L
-    val sellOrderTxFee       = MinTxFee
+      val sellerParty = blockchainSim.newParty("seller", ctx)
+      val sellerAskNanoErgs = 50000000L
+      val sellerAskTokenAmount = 100L
+      val sellerDexFee = 1000000L
+      val sellOrderTxFee = MinTxFee
 
-       println("something")
-    sellerParty.generateUnspentBoxes(
-      toSpend       = sellOrderTxFee + sellerDexFee,
-      tokensToSpend = List(token -> sellerAskTokenAmount)
-    )
-      
+      println("something")
+      sellerParty.generateUnspentBoxes(
+        toSpend = sellOrderTxFee + sellerDexFee,
+        tokensToSpend = List(token -> sellerAskTokenAmount))
 
-    val sellOrderTransaction =
-      sellerOrder(
-        ctx,
-        sellerParty,
-        token,
-        sellerAskTokenAmount,
-        sellerAskNanoErgs,
-        sellerDexFee,
-        sellOrderTxFee
-      )
+      val sellOrderTransaction =
+        sellerOrder(
+          ctx,
+          sellerParty,
+          token,
+          sellerAskTokenAmount,
+          sellerAskNanoErgs,
+          sellerDexFee,
+          sellOrderTxFee)
 
-    val sellOrderTransactionSigned = sellerParty.wallet.sign(sellOrderTransaction)
+      val sellOrderTransactionSigned = sellerParty.wallet.sign(sellOrderTransaction)
 
-    
       ctx.sendTransaction(sellOrderTransactionSigned)
-      
 
-    val txBuilder = ctx.newTxBuilder()
+      val txBuilder = ctx.newTxBuilder()
 
       val id = sellOrderTransactionSigned.getOutputsToSpend().get(0).getId().getBytes
       val c = ctx.compileContract(ConstantsBuilder.create()
-        .item("pk",sellerParty.wallet.getAddress.asP2PK().pubkey).build(), "pk")
+        .item("pk", sellerParty.wallet.getAddress.asP2PK().pubkey).build(), "pk")
       val sellerOutBox = txBuilder
         .outBoxBuilder()
         .value(sellerAskNanoErgs)
         .registers(ErgoValue.of(id))
         .contract(c).build()
-    //val sellerOutBox =
-     // Box(
-      //  value    = sellerAskNanoErgs,
-      //  register = (R4 -> sellOrderTransactionSigned.outputs(0).id),
-       // script   = ErgoScriptCompiler.contract(sellerParty.wallet.getAddress.getPublicKey)
-       // )
-      
 
-      
       val tokens = new ErgoToken(token.tokenId.toString(), buyerBidTokenAmount)
-      val env =    ConstantsBuilder.create()
-          .item("pk", buyerParty.wallet.getAddress.asP2PK().pubkey).build()
-      val c2 = ctx.compileContract(env,"pk")
-      val id2 = buyOrderTransactionSigned.getOutputsToSpend().get(0).getId().getBytes    
-     val buyerOutBox = txBuilder
+      val env = ConstantsBuilder.create()
+        .item("pk", buyerParty.wallet.getAddress.asP2PK().pubkey).build()
+      val c2 = ctx.compileContract(env, "pk")
+      val id2 = buyOrderTransactionSigned.getOutputsToSpend().get(0).getId().getBytes
+      val buyerOutBox = txBuilder
         .outBoxBuilder()
         .value(buyerSwapBoxValue)
-        .tokens(tokens )
+        .tokens(tokens)
         .registers(ErgoValue.of(id2))
-       .contract(c2).build()
-   // val buyerOutBox = Box(
-   //   value    = buyerSwapBoxValue,
-   //   token    = (token -> buyerBidTokenAmount),
-   //   register = (R4 -> buyOrderTransactionSigned.outputs(0).id),
-   //   script   = ErgoScriptCompiler.contract(buyerParty.wallet.getAddress.getPublicKey)
-   // )
+        .contract(c2).build()
 
-    val dexParty = blockchainSim.newParty("DEX", ctx)
+      val dexParty = blockchainSim.newParty("DEX", ctx)
 
-    val dexFee    = sellerDexFee + buyerDexFee
-    val swapTxFee = MinTxFee
-    val c3 = ctx.compileContract(ConstantsBuilder.create()
-        .item("pk",dexParty.wallet.getAddress.asP2PK().pubkey).build(), "pk")
-    val dexFeeOutBox = txBuilder
+      val dexFee = sellerDexFee + buyerDexFee
+      val swapTxFee = MinTxFee
+      val c3 = ctx.compileContract(ConstantsBuilder.create()
+        .item("pk", dexParty.wallet.getAddress.asP2PK().pubkey).build(), "pk")
+      val dexFeeOutBox = txBuilder
         .outBoxBuilder()
         .value(dexFee - swapTxFee)
         .contract(c3).build()
-   // val dexFeeOutBox = Box(
-   //   value  = dexFee - swapTxFee,
-    //  script = ErgoScriptCompiler.contract(dexParty.wallet.getAddress.getPublicKey)
-    //    )
-      
 
-      
-      val outputsSwap =  List(
-          buyOrderTransactionSigned.getOutputsToSpend().get(0),
-          sellOrderTransactionSigned.getOutputsToSpend().get(0)).asJava
+      val outputsSwap = List(
+        buyOrderTransactionSigned.getOutputsToSpend().get(0),
+        sellOrderTransactionSigned.getOutputsToSpend().get(0)).asJava
       val swapTransaction = txBuilder
         .boxesToSpend(outputsSwap)
         .outputs(buyerOutBox, sellerOutBox, dexFeeOutBox)
@@ -254,30 +211,13 @@ object AssetsAtomicExchangePlayground  {
         .sendChangeTo(dexParty.wallet.getAddress.getErgoAddress())
         // it should look like .sendChangeTo(prover.getP2PKAddress())
         .build()
-       println("somethingafter")
-   // val swapTransaction = Transaction(
-   //   inputs =
-   //     List(buyOrderTransactionSigned.outputs(0), sellOrderTransactionSigned.outputs(0)),
-   //   outputs = List(buyerOutBox, sellerOutBox, dexFeeOutBox),
-   //   fee     = swapTxFee
-   // )
 
-     
-    val swapTransactionSigned = dexParty.wallet.sign(swapTransaction)
+      val swapTransactionSigned = dexParty.wallet.sign(swapTransaction)
 
-      
-    ctx.sendTransaction(swapTransactionSigned)
+      ctx.sendTransaction(swapTransactionSigned)
 
-
-    //sellerParty.printUnspentAssets()
-   // buyerParty.printUnspentAssets()
-    //  dexParty.printUnspentAssets()
-
-
-      
-
-        sellerParty.printUnspentAssets()
-    buyerParty.printUnspentAssets()
+      sellerParty.printUnspentAssets()
+      buyerParty.printUnspentAssets()
       dexParty.printUnspentAssets()
 
       // assert assets based on original implementation
@@ -285,11 +225,11 @@ object AssetsAtomicExchangePlayground  {
       assert(blockchainSim.getUnspentCoinsFor(buyerParty.wallet.getAddress) == 1000000)
       assert(blockchainSim.getUnspentCoinsFor(dexParty.wallet.getAddress) == 1000000)
 
-            // mint new token
+      // mint new token
 
-      val spendingBoxes = ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress,0, 0)
+      val spendingBoxes = ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress, 0, 0)
       val proposedToken: ErgoToken = new ErgoToken(spendingBoxes.get(0).getId, 1)
-      val tokenName="somename"
+      val tokenName = "somename"
       val tokenDescription = "tokenDescription"
       val newBox = txBuilder.outBoxBuilder().mintToken(proposedToken, tokenName, tokenDescription, 10.toInt).value(swapTxFee)
         .contract(c3).build()
@@ -307,8 +247,6 @@ object AssetsAtomicExchangePlayground  {
 
   }
 
-
- // swapScenario
   //refundSellOrderScenario
   //refundBuyOrderScenario
 }
@@ -317,8 +255,8 @@ import org.scalatest._
 
 class SimplAtomicExchangeSpec extends WordSpecLike with Matchers {
 
-   "emulate a simple transaction" in {
+  "emulate a simple transaction" in {
 
-     AssetsAtomicExchangePlayground.swapScenario
+    AssetsAtomicExchangePlayground.swapScenario
   }
 }
