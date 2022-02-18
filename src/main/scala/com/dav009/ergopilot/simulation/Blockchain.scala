@@ -177,10 +177,7 @@ case class DummyBlockchainSimulationImpl(scenarioName: String)
   }
 
   override def newToken(name: String): TokenInfo = {
-    print("new ID:::")
     val tokenId = boxIdGen.sample.get
-    print("new ID: " + tokenId)
-
     tokenNames += (new ErgoId(tokenId) -> name)
     return TokenInfo(new ErgoId(tokenId), name)
   }

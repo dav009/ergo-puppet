@@ -19,7 +19,6 @@ import org.ergoplatform.appkit.impl.{SignedTransactionImpl, InputBoxImpl}
 import java.util;
 import scala.collection.JavaConverters._
 
-//.serialization.generators.ObjectGenerators
 
 class SimulatedBlockchainContext(
     client: ApiClient,
@@ -39,45 +38,22 @@ class SimulatedBlockchainContext(
       headers
     ) {
 
-  // ok
-  // override def getNodeInfo: NodeInfo = {
-  //  nodeInfo
-  //}
-
-  // ok
   override def signedTxFromJson(json: String): SignedTransaction = ???
 
-  // need to use blockcahin
   override def getBoxesById(boxIds: String*): Array[InputBox] = ???
 
-  // ok
-  //override def newProverBuilder(): ErgoProverBuilder = ???
-
-  // need to use blockchain
   override def getHeight: Int = {
     blockchain.getHeight
   }
 
-  // ok
   override def getWallet: ErgoWallet = ???
 
-  // need to use blockchian
   override def sendTransaction(tx: SignedTransaction): String = {
     val ergoTx: ErgoLikeTransaction = tx.asInstanceOf[SignedTransactionImpl].getTx();
     blockchain.send(ergoTx)
     "something"
   }
 
-  // ok
-  //override def createPreHeader(): PreHeaderBuilder = ???
-
-  //ok
-  //override def getCoveringBoxesFor(address: Address,
-  //                                 amountToSpend: Long,
-  //                                 tokensToSpend: util.List[ErgoToken]): CoveringBoxes = ???
-
-  // need to use blockchain
-  // done
   override def getUnspentBoxesFor(
       address: Address,
       offset: Int,
