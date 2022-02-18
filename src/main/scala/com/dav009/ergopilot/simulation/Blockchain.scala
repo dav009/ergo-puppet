@@ -1,42 +1,25 @@
 package com.dav009.ergopilot.simulation
 import com.dav009.ergopilot.model.{BlockchainSimulation, Party, TokenAmount, TokenInfo}
-import org.ergoplatform.appkit.{Address, BlockchainContext, ErgoType, ErgoValue}
+import org.ergoplatform.appkit.{Iso, ErgoToken, Address, BlockchainContext, ErgoType, ErgoValue}
 import org.ergoplatform.{ErgoBox, ErgoLikeTransaction}
 import scala.collection.mutable
 import org.ergoplatform.wallet.protocol.context.{ErgoLikeParameters, ErgoLikeStateContext}
-import sigmastate.eval.{CGroupElement, CPreHeader, Colls}
 import special.collection.Coll
 import org.ergoplatform.appkit.ErgoId
-import special.sigma.{Header, PreHeader}
 import scorex.crypto.authds.ADDigest
-import scorex.util.ModifierId
 import scorex.util.encode.Base16
 import sigmastate.interpreter.CryptoConstants
-import org.ergoplatform.ErgoBox.BoxId
-import org.ergoplatform.ErgoBox.TokenId
-import org.ergoplatform.ErgoBox.{AdditionalRegisters, R4, TokenId}
+import org.ergoplatform.ErgoBox.{BoxId, TokenId, AdditionalRegisters, R4}
 import sigmastate.eval.Extensions.ArrayOps
-import special.collection.Coll
 import scorex.util._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.{PropSpec, Matchers}
-import org.scalacheck.Arbitrary._
 import sigmastate.serialization.generators.ObjectGenerators
-import sigmastate.eval.Extensions._
 import sigmastate.eval._
-import scorex.crypto.hash.Digest32
-//import org.ergoplatform.appkit.JavaHelpers._
-import org.ergoplatform.appkit.{Iso, _}
-import sigmastate.utils.Helpers._
 import collection.JavaConverters._
 import sigmastate.eval.CostingDataContext
-import org.ergoplatform.appkit.Iso
-import special.collection.Coll
-import special.sigma.{SigmaProp, SigmaContract, Context, DslSyntaxExtensions, SigmaDslBuilder}
-import sigmastate.eval.CostingSigmaDslBuilder
-import scalan.RType
+import special.sigma.{Header, PreHeader, SigmaProp, SigmaContract, Context, DslSyntaxExtensions, SigmaDslBuilder}
 
-import org.ergoplatform.ErgoBox.{AdditionalRegisters, R4, TokenId}
 
 case class DummyBlockchainSimulationImpl(scenarioName: String)
     extends BlockchainSimulation
