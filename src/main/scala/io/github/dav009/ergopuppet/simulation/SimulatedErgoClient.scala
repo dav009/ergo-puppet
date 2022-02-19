@@ -1,6 +1,6 @@
-package io.github.dav009.ergopilot.simulation
+package io.github.dav009.ergopuppet.simulation
 
-import io.github.dav009.ergopilot.model.BlockchainSimulation
+import io.github.dav009.ergopuppet.model.BlockchainSimulation
 import java.util.function
 
 import org.ergoplatform.appkit.{ErgoClient, BlockchainContext}

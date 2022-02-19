@@ -1,4 +1,4 @@
-package io.github.dav009.ergopilot.model
+package io.github.dav009.ergopuppet.model
 
 import org.ergoplatform.appkit.{
   Address,

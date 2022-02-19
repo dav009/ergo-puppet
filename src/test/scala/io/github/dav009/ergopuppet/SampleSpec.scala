@@ -1,6 +1,6 @@
-package io.github.dav009.ergopilot.test
+package io.github.dav009.ergopuppet.test
 
-import io.github.dav009.ergopilot.Simulator._
+import io.github.dav009.ergopuppet.Simulator._
 import org.ergoplatform.appkit._
 import org.ergoplatform.P2PKAddress
 import org.scalatest.{PropSpec, Matchers}

@@ -1,4 +1,4 @@
-package io.github.dav009.ergopilot.simulation
+package io.github.dav009.ergopuppet.simulation
 
 import org.ergoplatform.ErgoLikeTransaction
 import org.ergoplatform.wallet.interpreter.ErgoInterpreter

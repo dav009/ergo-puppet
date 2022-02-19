@@ -1,13 +1,13 @@
-package io.github.dav009.ergopilot.test
+package io.github.dav009.ergopuppet.test
 
-import io.github.dav009.ergopilot.Simulator._
+import io.github.dav009.ergopuppet.Simulator._
 import org.ergoplatform.appkit._
 import org.ergoplatform.P2PKAddress
 import org.scalatest.{ PropSpec, Matchers }
 import org.ergoplatform.ErgoAddressEncoder
 import org.scalatest._
 import org.scalatest.{ Matchers, WordSpecLike }
-import io.github.dav009.ergopilot.model.{ TokenAmount, TokenInfo }
+import io.github.dav009.ergopuppet.model.{ TokenAmount, TokenInfo }
 
 class MintNFTSpec extends WordSpecLike with Matchers {
 

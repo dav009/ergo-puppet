@@ -1,5 +1,5 @@
-package io.github.dav009.ergopilot.simulation
-import io.github.dav009.ergopilot.model.{Wallet, Party, TokenInfo, TokenAmount}
+package io.github.dav009.ergopuppet.simulation
+import io.github.dav009.ergopuppet.model.{Wallet, Party, TokenInfo, TokenAmount}
 import org.ergoplatform.{ErgoBox, ErgoAddressEncoder, P2PKAddress, ErgoLikeTransaction}
 import org.ergoplatform.appkit.{
   Address,

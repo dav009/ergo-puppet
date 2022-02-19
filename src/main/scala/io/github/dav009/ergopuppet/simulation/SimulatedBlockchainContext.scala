@@ -1,5 +1,5 @@
-package io.github.dav009.ergopilot.simulation
-import io.github.dav009.ergopilot.model.BlockchainSimulation
+package io.github.dav009.ergopuppet.simulation
+import io.github.dav009.ergopuppet.model.BlockchainSimulation
 import org.ergoplatform.restapi.client.{ApiClient, NodeInfo}
 import retrofit2.Retrofit
 import java.util.{List => JavaList}
