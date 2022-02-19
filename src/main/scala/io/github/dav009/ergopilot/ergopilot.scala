@@ -1,6 +1,6 @@
-package com.dav009.ergopilot
+package io.github.dav009.ergopilot
 
-import com.dav009.ergopilot.simulation.{DummyBlockchainSimulationImpl, SimulatedErgoClient}
+import io.github.dav009.ergopilot.simulation.{DummyBlockchainSimulationImpl, SimulatedErgoClient}
 import special.collection.Coll
 import scorex.util._
 

@@ -1,4 +1,6 @@
 name := "ergopilot"
+organization := "io.github.dav009"
+publishMavenStyle := true
 
 scalaVersion := "2.12.10"
 
@@ -15,6 +17,9 @@ libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.+"
 //libraryDependencies += ("org.ergoplatform" %% "ergo-appkit" % "4.0.6" % Test).classifier("tests")// %  "compile->test"
 libraryDependencies += ("org.scorexfoundation" %% "sigma-state" % "4.0.5" ).classifier("tests") % "compile->compile;test->compile"
 //libraryDependencies += ("org.scorexfoundation" %% "sigma-state" % "4.0.5" % Test).classifier("tests")
+
+
+
 
 
 

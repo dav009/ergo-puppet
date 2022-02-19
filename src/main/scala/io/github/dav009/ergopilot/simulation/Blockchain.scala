@@ -1,5 +1,5 @@
-package com.dav009.ergopilot.simulation
-import com.dav009.ergopilot.model.{BlockchainSimulation, Party, TokenAmount, TokenInfo}
+package io.github.dav009.ergopilot.simulation
+import io.github.dav009.ergopilot.model.{BlockchainSimulation, Party, TokenAmount, TokenInfo}
 import org.ergoplatform.appkit.{Iso, ErgoToken, Address, BlockchainContext, ErgoType, ErgoValue}
 import org.ergoplatform.{ErgoBox, ErgoLikeTransaction}
 import scala.collection.mutable
