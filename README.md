@@ -45,7 +45,6 @@ ergoClient.execute(
           ctx.compileContract(
             ConstantsBuilder
               .create()
-              // this looks ugly
               .item("recPk", receiverParty.wallet.getAddress.asP2PK().pubkey)
               .build(),
             "{ recPk }"
