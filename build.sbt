@@ -1,4 +1,4 @@
-name := "ergopilot"
+name := "ergopuppet"
 organization := "io.github.dav009"
 publishMavenStyle := true
 
