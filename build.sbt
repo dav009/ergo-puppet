@@ -10,7 +10,7 @@ lazy val sonatypeSnapshots = "Sonatype Snapshots" at "https://oss.sonatype.org/c
 
 resolvers ++= Seq(Resolver.mavenLocal, sonatypeReleases, sonatypeSnapshots, Resolver.mavenCentral)
 
-libraryDependencies += "org.ergoplatform" %% "ergo-appkit" % "dp-sigma-401-signing-func-623ece4d-SNAPSHOT"
+libraryDependencies += "org.ergoplatform" %% "ergo-appkit" % "4.0.7"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.+"

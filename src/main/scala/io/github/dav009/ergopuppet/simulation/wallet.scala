@@ -1,6 +1,6 @@
 package io.github.dav009.ergopuppet.simulation
 import io.github.dav009.ergopuppet.model.{Wallet, Party, TokenInfo, TokenAmount}
-import org.ergoplatform.{ErgoBox, ErgoAddressEncoder, P2PKAddress, ErgoLikeTransaction}
+import org.ergoplatform.{ErgoBox, ErgoAddressEncoder, P2PKAddress, ErgoLikeTransaction, UnsignedErgoLikeTransaction}
 import org.ergoplatform.appkit.{
   Address,
   UnsignedTransaction,
@@ -65,8 +65,12 @@ class DummyWalletImpl(
       dhtInputs = dhtInputs,
       params = blockchain.parameters
     )
+    // tmp hack while https://github.com/ergoplatform/ergo-appkit/pull/138 gets released
+    val m = txImpl.getClass.getDeclaredMethod("getTx")
+    m.setAccessible(true)
+    val unsignedErgoLikeTx =  m.invoke(txImpl).asInstanceOf[UnsignedErgoLikeTransaction]
     val (signed, cost) =
-      prover.sign(txImpl.getTx, boxesToSpend, dataBoxes, blockchain.stateContext, baseCost = 0).get
+      prover.sign(unsignedErgoLikeTx, boxesToSpend, dataBoxes, blockchain.stateContext, baseCost = 0).get
 
     new SignedTransactionImpl(ctx, signed, cost)
   }
