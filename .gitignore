@@ -1,0 +1,35 @@
+
+*.log
+docs/spec/out/
+test-out/
+flamegraphs/
+
+# sbt specific
+.bsp/
+.cache
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# IntelliJ Idea 
+.idea/
+*.iml
+
+# file system
+
+**/.DS_Store
+
+# scal metals and bloop 
+.bloop/
+.metals/
+project/metals.sbt
+.vscode
+project/project/*
