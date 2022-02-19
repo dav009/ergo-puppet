@@ -17,7 +17,9 @@ libraryDependencies += ("org.scorexfoundation" %% "sigma-state" % "4.0.5" ).clas
 
 ## Simple TX Example
 
-Testing a simple transaction.
+- More examples you can check in the test folder 
+- See code snippet below for testing a simple transaction.
+
 ```scala
 import io.github.dav009.ergopuppet.Simulator._
 
@@ -73,8 +75,8 @@ ergoClient.execute(
         senderPartyUnspentCoins == (10000000000L - Parameters.MinFee - amountToSpend)
       )
       assert(receiverUnspentCoins == (amountToSpend))
-
-}
+  }
+)
 ....
 
 ```
