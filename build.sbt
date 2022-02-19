@@ -1,8 +1,15 @@
+import sbt.Keys.{publishMavenStyle, scalaVersion}
 name := "ergopuppet"
 organization := "io.github.dav009"
+publishArtifact in (Compile, packageSrc) := true
+publishArtifact in (Compile, packageDoc) := true
 publishMavenStyle := true
-
+publishTo := sonatypePublishToBundle.value
 scalaVersion := "2.12.10"
+enablePlugins(GitVersioning)
+scmInfo := Some(
+    ScmInfo(url("https://github.com/dav009/ergo-puppet"), "scm:git@github.com:dav009/ergo-puppet.git")
+)
 
 lazy val sonatypePublic = "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
 lazy val sonatypeReleases = "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
