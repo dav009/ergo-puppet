@@ -6,10 +6,7 @@ Puppet is an upgrade on the [ergo playground](https://github.com/ergoplatform/er
 
 Puppet provides you with a dummy `ErgoClient` and a dummy `BlockchainContext`.
 
-
-## Usage
-
-Be aware that this project is WIP.
+## Usage
 
 add the following dependencies to your `build.sbt`:
 
