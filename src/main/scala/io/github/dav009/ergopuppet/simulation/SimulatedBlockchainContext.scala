@@ -51,7 +51,6 @@ class SimulatedBlockchainContext(
   override def sendTransaction(tx: SignedTransaction): String = {
     val ergoTx: ErgoLikeTransaction = tx.asInstanceOf[SignedTransactionImpl].getTx();
     blockchain.send(ergoTx)
-    "something"
   }
 
   override def getUnspentBoxesFor(

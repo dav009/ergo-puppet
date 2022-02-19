@@ -49,6 +49,7 @@ class MintNFTSpec extends WordSpecLike with Matchers {
 
       val receiverOwnedTokens = blockchainSim.getUnspentTokensFor(receiverParty.wallet.getAddress)
       assert(receiverOwnedTokens == List(new TokenAmount(new TokenInfo(spendingBoxes.get(0).getId(), tokenName), 1)))
+
     })
 
   }

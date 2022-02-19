@@ -44,7 +44,7 @@ trait BlockchainSimulation {
 
   def newToken(name: String): TokenInfo
 
-  def send(tx: ErgoLikeTransaction): Unit
+  def send(tx: ErgoLikeTransaction): String
 
   def setHeight(height: Int): Unit
 

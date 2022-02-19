@@ -101,11 +101,13 @@ object AssetsAtomicExchangePlayground {
       .tokens(tokens)
       .build()
 
-    txBuilder
+    (
+      txBuilder
       .boxesToSpend(sellerBalanceBoxes)
       .outputs(sellerAskBox)
       .fee(txFee)
-      .sendChangeTo(sellerParty.wallet.getAddress.getErgoAddress()).build()
+      .sendChangeTo(sellerParty.wallet.getAddress.getErgoAddress()).build(),
+      sellerContractCompiled)
 
   }
 
@@ -153,7 +155,7 @@ object AssetsAtomicExchangePlayground {
         toSpend = sellOrderTxFee + sellerDexFee,
         tokensToSpend = List(token -> sellerAskTokenAmount))
 
-      val sellOrderTransaction =
+      val (sellOrderTransaction, _) =
         sellerOrder(
           ctx,
           sellerParty,
@@ -225,14 +227,91 @@ object AssetsAtomicExchangePlayground {
       assert(blockchainSim.getUnspentCoinsFor(buyerParty.wallet.getAddress) == 1000000)
       assert(blockchainSim.getUnspentCoinsFor(dexParty.wallet.getAddress) == 1000000)
 
+     val sellerOwnedTokens =
+        blockchainSim.getUnspentTokensFor(sellerParty.wallet.getAddress)
+      assert(sellerOwnedTokens == List())
+
+    val buyerOwnedTokens =
+        blockchainSim.getUnspentTokensFor(buyerParty.wallet.getAddress)
+      assert(buyerOwnedTokens == List(new TokenAmount(new TokenInfo(token.tokenId, "TKN"), 100)))
+
+      val dexOwnedTokens = blockchainSim.getUnspentTokensFor(dexParty.wallet.getAddress)
+      assert(dexOwnedTokens == List())
+
 
     })
-
   }
 
-  //refundSellOrderScenario
-  //refundBuyOrderScenario
+  def refundSellOrderScenario = {
+
+    val (blockchainSim, ergoClient) = newBlockChainSimulationScenario("Refund Sell Order")
+
+    ergoClient.execute((ctx: BlockchainContext) => {
+      val token = blockchainSim.newToken("TKN")
+      val sellerParty = blockchainSim.newParty("seller", ctx)
+      val sellerAskNanoErgs = 50000000L
+      val sellerAskTokenAmount = 100L
+      val sellerDexFee = 1000000L
+      val sellOrderTxFee = MinTxFee
+      val cancelTxFee = MinTxFee
+
+      sellerParty.generateUnspentBoxes(
+        toSpend = sellerDexFee + sellOrderTxFee + cancelTxFee,
+        tokensToSpend = List(token -> sellerAskTokenAmount))
+
+      val (sellOrderTransaction, sellerOfferBoxContract) =
+        sellerOrder(
+          ctx,
+          sellerParty,
+          token,
+          sellerAskTokenAmount,
+          sellerAskNanoErgs,
+          sellerDexFee,
+          sellOrderTxFee)
+
+      val sellOrderTransactionSigned = sellerParty.wallet.sign(sellOrderTransaction)
+
+      val sellerPk = sellerParty.wallet.getAddress.getPublicKey
+      val env = ConstantsBuilder.create().item("sellerPk", sellerPk).build()
+      val sellerContractCompiled = ctx.compileContract(env, "{sellerPk}")
+      val tx1 = ctx.sendTransaction(sellOrderTransactionSigned)
+      val txBuilder = ctx.newTxBuilder()
+      val sellerRefundBox = txBuilder.outBoxBuilder()
+        .value(sellerDexFee)
+        .tokens(new ErgoToken(token.tokenId, sellerAskTokenAmount))
+        .contract(sellerContractCompiled)
+        .build()
+
+      //val inputBoxes = List(outputsSellOrder) ++
+
+      val contractAddress = Address.fromErgoTree(sellerOfferBoxContract.getErgoTree(), NetworkType.MAINNET)
+      val sellerAskBoxes = ctx.getUnspentBoxesFor(contractAddress, 0, Int.MaxValue)
+      val boxs = sellerAskBoxes.asScala ++ ctx.getUnspentBoxesFor(sellerParty.wallet.getAddress, 0, Int.MaxValue).asScala
+      val cancelSellTransaction = txBuilder
+        .boxesToSpend(boxs.toList.asJava)
+        .outputs(sellerRefundBox)
+        .fee(cancelTxFee)
+        .sendChangeTo(sellerParty.wallet.getAddress.getErgoAddress())
+        .build()
+
+      val cancelSellTransactionSigned = sellerParty.wallet.sign(cancelSellTransaction)
+
+      ctx.sendTransaction(cancelSellTransactionSigned)
+      sellerParty.printUnspentAssets()
+        // assert assets based on original implementation
+      assert(blockchainSim.getUnspentCoinsFor(sellerParty.wallet.getAddress) == 1000000)
+     val sellerOwnedTokens =
+        blockchainSim.getUnspentTokensFor(sellerParty.wallet.getAddress)
+      assert(
+        sellerOwnedTokens == List(
+          new TokenAmount(new TokenInfo(token.tokenId, "TKN"), 100)
+        )
+      )
+    })
+  }
 }
+
+//refundBuyOrderScenario
 
 import org.scalatest._
 
@@ -241,5 +320,6 @@ class SimplAtomicExchangeSpec extends WordSpecLike with Matchers {
   "emulate a simple transaction" in {
 
     AssetsAtomicExchangePlayground.swapScenario
+    AssetsAtomicExchangePlayground.refundSellOrderScenario
   }
 }

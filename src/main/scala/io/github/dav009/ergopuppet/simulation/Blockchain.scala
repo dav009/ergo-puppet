@@ -155,7 +155,7 @@ case class DummyBlockchainSimulationImpl(scenarioName: String)
     newTokensWithNames
   }
 
-  override def send(tx: ErgoLikeTransaction): Unit = {
+  override def send(tx: ErgoLikeTransaction): String = {
 
     val boxesToSpend   = tx.inputs.map(i => getUnspentBox(i.boxId)).toIndexedSeq
     val dataInputBoxes = tx.dataInputs.map(i => getBox(i.boxId)).toIndexedSeq
@@ -174,6 +174,7 @@ case class DummyBlockchainSimulationImpl(scenarioName: String)
     tokenNames ++= newTokens
 
     println(s"..$scenarioName: Accepting transaction ${tx.id} to the blockchain")
+    tx.id
   }
 
   override def newToken(name: String): TokenInfo = {
