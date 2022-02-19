@@ -1,6 +1,6 @@
 # Ergo Puppet
 
-![](https://raw.githubusercontent.com/dav009/gachapon/master/puppet.png)
+![](https://raw.githubusercontent.com/dav009/ergo-puppet/master/puppet.png)
 
 Test your ergoscript using the same code conventions as in app-kit
 
